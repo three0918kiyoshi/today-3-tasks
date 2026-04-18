@@ -16,6 +16,7 @@
   padding: 20px;
   border-radius: 12px;
   background: #ffffff;
+  color: #111111;
 }
 
 .title {
@@ -35,6 +36,8 @@
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 16px;
+  background: #ffffff;
+  color: #111111;
 }
 
 .primaryButton,
@@ -62,6 +65,7 @@
   flex-direction: column;
   gap: 8px;
   font-size: 15px;
+  color: #111111;
 }
 
 .checks label {
