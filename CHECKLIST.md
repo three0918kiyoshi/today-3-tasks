@@ -9,7 +9,7 @@ today-3-tasks
 # Current Status
 
 -   Phase1 completed
--   Current Step: Step5
+-   Current Step: Step6
 -   Status: Ready
 
 ---
@@ -44,11 +44,11 @@ today-3-tasks
 
 ### Step5 UI 作成
 
--   [ ] タイトル表示
--   [ ] 入力欄 3 つ
--   [ ] 保存ボタン
--   [ ] チェック 3 つ
--   [ ] リセットボタン
+-   [x] タイトル表示
+-   [x] 入力欄 3 つ
+-   [x] 保存ボタン
+-   [x] チェック 3 つ
+-   [x] リセットボタン
 
 ### Step6 保存機能
 
