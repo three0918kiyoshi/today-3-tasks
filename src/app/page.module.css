@@ -73,3 +73,7 @@
   align-items: center;
   gap: 8px;
 }
+
+.checks input[type="checkbox"] {
+  background-color: #f2f2f2;
+}
