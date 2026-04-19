@@ -74,8 +74,16 @@ const shuffle = (items: string[]): string[] => {
   return copied;
 };
 
-const buildSuggestedTasks = (storedState: TodoState): string[] => {
+const buildSuggestedTasks = (storedState: TodoState, history: TodoHistoryItem[]): string[] => {
   const picked: string[] = [];
+  const completedTasks = new Set(
+    history.flatMap((item) =>
+      item.tasks
+        .map((task, index) => ({ task: task.trim(), checked: Boolean(item.checkedStates[index]) }))
+        .filter((entry) => entry.checked && entry.task !== "")
+        .map((entry) => entry.task),
+    ),
+  );
 
   // 前回保存済みの未完了タスクを優先して候補に入れる
   storedState.tasks.forEach((task, index) => {
@@ -83,7 +91,12 @@ const buildSuggestedTasks = (storedState: TodoState): string[] => {
     if (picked.length >= 3) {
       return;
     }
-    if (!storedState.done[index] && trimmedTask !== "" && !picked.includes(trimmedTask)) {
+    if (
+      !storedState.done[index] &&
+      trimmedTask !== "" &&
+      !picked.includes(trimmedTask) &&
+      !completedTasks.has(trimmedTask)
+    ) {
       picked.push(trimmedTask);
     }
   });
@@ -94,7 +107,7 @@ const buildSuggestedTasks = (storedState: TodoState): string[] => {
     if (picked.length >= 3) {
       break;
     }
-    if (!picked.includes(task)) {
+    if (!picked.includes(task) && !completedTasks.has(task)) {
       picked.push(task);
     }
   }
@@ -104,7 +117,7 @@ const buildSuggestedTasks = (storedState: TodoState): string[] => {
     if (picked.length >= 3) {
       break;
     }
-    if (!picked.includes(task)) {
+    if (!picked.includes(task) && !completedTasks.has(task)) {
       picked.push(task);
     }
   }
@@ -245,7 +258,8 @@ export default function Home() {
     }
 
     const storedState = readStoredState();
-    const suggestedTasks = buildSuggestedTasks(storedState);
+    const history = readStoredHistory();
+    const suggestedTasks = buildSuggestedTasks(storedState, history);
     setState({
       tasks: suggestedTasks,
       done: [false, false, false],
