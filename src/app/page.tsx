@@ -9,6 +9,7 @@ type TodoState = {
 };
 
 const STORAGE_KEY = "today-3-tasks";
+const HISTORY_STORAGE_KEY = "today-3-tasks-history";
 const TEMPLATE_TASKS = [
   "最重要の開発タスクを1つ進める",
   "画面や機能を1つだけ修正する",
@@ -111,6 +112,67 @@ const buildSuggestedTasks = (storedState: TodoState): string[] => {
   return picked.slice(0, 3);
 };
 
+type TodoHistoryItem = {
+  id: string;
+  date: string;
+  tasks: string[];
+  checkedStates: boolean[];
+  savedAt: string;
+};
+
+const readStoredHistory = (): TodoHistoryItem[] => {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  const saved = localStorage.getItem(HISTORY_STORAGE_KEY);
+  if (!saved) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.filter((item) => {
+      return (
+        item &&
+        typeof item.id === "string" &&
+        typeof item.date === "string" &&
+        Array.isArray(item.tasks) &&
+        Array.isArray(item.checkedStates) &&
+        typeof item.savedAt === "string"
+      );
+    });
+  } catch {
+    localStorage.removeItem(HISTORY_STORAGE_KEY);
+    return [];
+  }
+};
+
+const saveHistoryEntry = (todoState: TodoState) => {
+  // 空文字のみの状態は履歴に追加しない
+  const hasAnyTask = todoState.tasks.some((task) => task.trim() !== "");
+  if (!hasAnyTask) {
+    return;
+  }
+
+  const now = new Date();
+  const historyItem: TodoHistoryItem = {
+    id: `${now.getTime()}-${Math.random().toString(36).slice(2)}`,
+    date: now.toISOString().slice(0, 10),
+    tasks: [...todoState.tasks],
+    checkedStates: [...todoState.done],
+    savedAt: now.toISOString(),
+  };
+
+  const history = readStoredHistory();
+  // 新しい履歴が先頭になるように保存
+  localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify([historyItem, ...history]));
+};
+
 export default function Home() {
   const [state, setState] = useState<TodoState>(INITIAL_STATE);
   const [message, setMessage] = useState("");
@@ -162,6 +224,7 @@ export default function Home() {
 
   const handleSave = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    saveHistoryEntry(state);
     showMessage("保存しました");
   };
 
