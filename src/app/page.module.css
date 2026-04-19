@@ -78,3 +78,9 @@
   background-color: #ffffff;
   color-scheme: light;
 }
+
+.message {
+  margin: 0;
+  font-size: 14px;
+  color: #0a7a32;
+}
