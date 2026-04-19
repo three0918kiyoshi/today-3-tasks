@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
 
 type TodoState = {
@@ -46,6 +46,8 @@ const readStoredState = (): TodoState => {
 
 export default function Home() {
   const [state, setState] = useState<TodoState>(INITIAL_STATE);
+  const [message, setMessage] = useState("");
+  const messageTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const timerId = window.setTimeout(() => {
@@ -54,7 +56,28 @@ export default function Home() {
 
     return () => window.clearTimeout(timerId);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (messageTimerRef.current !== null) {
+        window.clearTimeout(messageTimerRef.current);
+      }
+    };
+  }, []);
   const { tasks, done } = state;
+
+  const showMessage = (text: string) => {
+    setMessage(text);
+
+    if (messageTimerRef.current !== null) {
+      window.clearTimeout(messageTimerRef.current);
+    }
+
+    messageTimerRef.current = window.setTimeout(() => {
+      setMessage("");
+      messageTimerRef.current = null;
+    }, 3000);
+  };
 
   const handleTaskChange = (index: number, value: string) => {
     setState((prev) => ({
@@ -72,11 +95,13 @@ export default function Home() {
 
   const handleSave = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    showMessage("保存しました");
   };
 
   const handleReset = () => {
     setState(INITIAL_STATE);
     localStorage.removeItem(STORAGE_KEY);
+    showMessage("リセットしました");
   };
 
   return (
@@ -100,6 +125,8 @@ export default function Home() {
         <button type="button" className={styles.primaryButton} onClick={handleSave}>
           保存
         </button>
+
+        {message && <p className={styles.message}>{message}</p>}
 
         <div className={styles.checks}>
           {done.map((checked, index) => (
