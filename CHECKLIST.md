@@ -9,7 +9,7 @@ today-3-tasks
 # Current Status
 
 -   Phase1 completed
--   Current Step: Step6
+-   Current Step: Step7
 -   Status: Ready
 
 ---
@@ -52,10 +52,10 @@ today-3-tasks
 
 ### Step6 保存機能
 
--   [ ] localStorage 保存
--   [ ] 再読み込み復元
--   [ ] チェック状態保持
--   [ ] リセット動作
+-   [x] localStorage 保存
+-   [x] 再読み込み復元
+-   [x] チェック状態保持
+-   [x] リセット動作
 
 ---
 
