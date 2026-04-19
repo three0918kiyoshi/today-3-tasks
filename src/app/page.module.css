@@ -80,7 +80,17 @@
 }
 
 .message {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
   margin: 0;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(17, 17, 17, 0.92);
+  color: #ffffff;
   font-size: 14px;
-  color: #0a7a32;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 10;
 }
