@@ -9,7 +9,26 @@ type TodoState = {
 };
 
 const STORAGE_KEY = "today-3-tasks";
-const TEMPLATE_TASKS = ["部屋を5分片付ける", "10分だけ読書する", "明日の準備をする"];
+const TEMPLATE_TASKS = [
+  "最重要の開発タスクを1つ進める",
+  "画面や機能を1つだけ修正する",
+  "15分だけ実装を進める",
+  "未完了タスクを1つ片付ける",
+  "動作確認をして不具合を1つ見つける",
+  "不具合を1つ修正する",
+  "次にやる作業を3つに整理する",
+  "公開中アプリを実際に使って改善点を1つ記録する",
+  "GitHubの作業内容を1つ反映する",
+  "今日の結果を短くメモする",
+];
+const DEVELOPMENT_TEMPLATE_TASKS = [
+  "最重要の開発タスクを1つ進める",
+  "画面や機能を1つだけ修正する",
+  "15分だけ実装を進める",
+  "動作確認をして不具合を1つ見つける",
+  "不具合を1つ修正する",
+  "GitHubの作業内容を1つ反映する",
+];
 const INITIAL_STATE: TodoState = {
   tasks: ["", "", ""],
   done: [false, false, false],
@@ -45,25 +64,37 @@ const readStoredState = (): TodoState => {
   return INITIAL_STATE;
 };
 
-// 前回保存データの未完了タスクを優先し、足りない分を固定テンプレで補う
-const buildSuggestedTasks = (savedState: TodoState, templates: string[]): string[] => {
-  const fromUndone = savedState.tasks.filter((task, index) => {
-    return task.trim() !== "" && !savedState.done[index];
-  });
+const shuffle = (items: string[]): string[] => {
+  const copied = [...items];
+  for (let i = copied.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copied[i], copied[j]] = [copied[j], copied[i]];
+  }
+  return copied;
+};
 
-  const suggestions = [...fromUndone];
+const buildSuggestedTasks = (): string[] => {
+  const picked: string[] = [];
 
-  for (const template of templates) {
-    if (suggestions.length >= 3) {
+  const shuffledDevelopment = shuffle(DEVELOPMENT_TEMPLATE_TASKS);
+  for (const task of shuffledDevelopment) {
+    if (picked.length >= 2) {
       break;
     }
+    picked.push(task);
+  }
 
-    if (!suggestions.includes(template)) {
-      suggestions.push(template);
+  const shuffledAll = shuffle(TEMPLATE_TASKS);
+  for (const task of shuffledAll) {
+    if (picked.length >= 3) {
+      break;
+    }
+    if (!picked.includes(task)) {
+      picked.push(task);
     }
   }
 
-  return suggestions.slice(0, 3);
+  return picked;
 };
 
 export default function Home() {
@@ -136,8 +167,7 @@ export default function Home() {
       }
     }
 
-    const savedState = readStoredState();
-    const suggestedTasks = buildSuggestedTasks(savedState, TEMPLATE_TASKS);
+    const suggestedTasks = buildSuggestedTasks();
     setState({
       tasks: suggestedTasks,
       done: [false, false, false],
