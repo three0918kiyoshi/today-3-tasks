@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 
 type TodoState = {
@@ -45,7 +45,15 @@ const readStoredState = (): TodoState => {
 };
 
 export default function Home() {
-  const [state, setState] = useState<TodoState>(() => readStoredState());
+  const [state, setState] = useState<TodoState>(INITIAL_STATE);
+
+  useEffect(() => {
+    const timerId = window.setTimeout(() => {
+      setState(readStoredState());
+    }, 0);
+
+    return () => window.clearTimeout(timerId);
+  }, []);
   const { tasks, done } = state;
 
   const handleTaskChange = (index: number, value: string) => {
