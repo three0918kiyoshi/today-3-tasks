@@ -9,6 +9,7 @@ type TodoState = {
 };
 
 const STORAGE_KEY = "today-3-tasks";
+const TEMPLATE_TASKS = ["部屋を5分片付ける", "10分だけ読書する", "明日の準備をする"];
 const INITIAL_STATE: TodoState = {
   tasks: ["", "", ""],
   done: [false, false, false],
@@ -42,6 +43,27 @@ const readStoredState = (): TodoState => {
   }
 
   return INITIAL_STATE;
+};
+
+// 前回保存データの未完了タスクを優先し、足りない分を固定テンプレで補う
+const buildSuggestedTasks = (savedState: TodoState, templates: string[]): string[] => {
+  const fromUndone = savedState.tasks.filter((task, index) => {
+    return task.trim() !== "" && !savedState.done[index];
+  });
+
+  const suggestions = [...fromUndone];
+
+  for (const template of templates) {
+    if (suggestions.length >= 3) {
+      break;
+    }
+
+    if (!suggestions.includes(template)) {
+      suggestions.push(template);
+    }
+  }
+
+  return suggestions.slice(0, 3);
 };
 
 export default function Home() {
@@ -104,6 +126,25 @@ export default function Home() {
     showMessage("リセットしました");
   };
 
+  const handleSuggest = () => {
+    // 入力済みがある場合は、上書き前に確認する
+    const hasInput = tasks.some((task) => task.trim() !== "");
+    if (hasInput) {
+      const shouldOverwrite = window.confirm("入力内容を上書きして提案を反映しますか？");
+      if (!shouldOverwrite) {
+        return;
+      }
+    }
+
+    const savedState = readStoredState();
+    const suggestedTasks = buildSuggestedTasks(savedState, TEMPLATE_TASKS);
+    setState({
+      tasks: suggestedTasks,
+      done: [false, false, false],
+    });
+    showMessage("提案を反映しました");
+  };
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -121,6 +162,10 @@ export default function Home() {
             />
           ))}
         </div>
+
+        <button type="button" className={styles.secondaryButton} onClick={handleSuggest}>
+          提案する
+        </button>
 
         <button type="button" className={styles.primaryButton} onClick={handleSave}>
           保存
