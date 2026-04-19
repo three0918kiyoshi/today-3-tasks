@@ -73,15 +73,29 @@ const shuffle = (items: string[]): string[] => {
   return copied;
 };
 
-const buildSuggestedTasks = (): string[] => {
+const buildSuggestedTasks = (storedState: TodoState): string[] => {
   const picked: string[] = [];
 
+  // 前回保存済みの未完了タスクを優先して候補に入れる
+  storedState.tasks.forEach((task, index) => {
+    const trimmedTask = task.trim();
+    if (picked.length >= 3) {
+      return;
+    }
+    if (!storedState.done[index] && trimmedTask !== "" && !picked.includes(trimmedTask)) {
+      picked.push(trimmedTask);
+    }
+  });
+
+  // 不足分だけ固定テンプレ候補で補完する（重複は除外）
   const shuffledDevelopment = shuffle(DEVELOPMENT_TEMPLATE_TASKS);
   for (const task of shuffledDevelopment) {
-    if (picked.length >= 2) {
+    if (picked.length >= 3) {
       break;
     }
-    picked.push(task);
+    if (!picked.includes(task)) {
+      picked.push(task);
+    }
   }
 
   const shuffledAll = shuffle(TEMPLATE_TASKS);
@@ -94,7 +108,7 @@ const buildSuggestedTasks = (): string[] => {
     }
   }
 
-  return picked;
+  return picked.slice(0, 3);
 };
 
 export default function Home() {
@@ -167,7 +181,8 @@ export default function Home() {
       }
     }
 
-    const suggestedTasks = buildSuggestedTasks();
+    const storedState = readStoredState();
+    const suggestedTasks = buildSuggestedTasks(storedState);
     setState({
       tasks: suggestedTasks,
       done: [false, false, false],
